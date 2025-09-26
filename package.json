@@ -1,0 +1,21 @@
+{
+  "name": "telegram",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --bun --watch src/main.ts",
+    "build": "bun build --bun src/main.ts --outdir dist",
+    "start": "bun run --bun dist/main.js"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "grammy": "^1.38.2",
+    "zod": "^4.1.11"
+  }
+}
