@@ -135,7 +135,7 @@ function parseCallbackData(callbackData: string): {
       const parsed = JSON.parse(callbackData);
       const actionValue = parsed?.action || parsed?.cmd || "";
       return {
-        action: String(actionValue),
+        action: actionValue ? String(actionValue) : "",
         data: parsed?.data || parsed,
       };
     }
