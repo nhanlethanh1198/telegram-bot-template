@@ -55,8 +55,26 @@ export const buildCommandList = () => {
 
 export async function updateCommandList(bot: Bot) {
   await bot.api.deleteMyCommands();
+
+  const mappedCommands: Pick<BaseCommandType, "name" | "description">[] = [];
+
+  for (const cmd of commands) {
+    mappedCommands.push({
+      name: cmd.name,
+      description: cmd.description || "No description provided",
+    });
+    if (cmd.aliases) {
+      for (const alias of cmd.aliases) {
+        mappedCommands.push({
+          name: alias,
+          description: cmd.description || "No description provided",
+        });
+      }
+    }
+  }
+
   await bot.api.setMyCommands(
-    commands.map((command) => ({
+    mappedCommands.map((command) => ({
       command: command.name,
       description: command.description || "No description provided",
     })),
