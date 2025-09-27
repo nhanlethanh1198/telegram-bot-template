@@ -1,5 +1,6 @@
 import { Bot } from "grammy";
 import { registerCommands, updateCommandList } from "./commands";
+import { registerCallbacks } from "./callbacks";
 
 function main() {
   const telegramToken = Bun.env.TELEGRAM_BOT_TOKEN;
@@ -17,6 +18,7 @@ function main() {
   updateCommandList(bot);
 
   registerCommands(bot);
+  registerCallbacks(bot);
 
   bot.start();
 }

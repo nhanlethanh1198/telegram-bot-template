@@ -1,11 +1,11 @@
 import type { Context } from "grammy";
-import type { BaseCommandType } from ".";
-import { createInlineKeyboard } from "../callbacks";
+import type { BaseCallbackType } from ".";
+import { createInlineKeyboard } from ".";
 
-const command: BaseCommandType = {
-  name: "start",
-  description: "Start the bot and show welcome message",
-  category: "General",
+const callback: BaseCallbackType = {
+  name: "back_to_start",
+  description: "Return to the main start menu",
+  category: "Navigation",
   execute: async (context: Context) => {
     const welcomeMessage = `🤖 **Welcome to the Bot!**
 
@@ -34,11 +34,13 @@ Use /help to see all available commands.`;
       ],
     ]);
 
-    await context.reply(welcomeMessage, {
+    await context.editMessageText(welcomeMessage, {
       parse_mode: "Markdown",
       reply_markup: keyboard,
     });
+
+    await context.answerCallbackQuery("Welcome back to the main menu!");
   },
 };
 
-export default command;
+export default callback;
