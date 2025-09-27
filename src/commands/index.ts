@@ -51,6 +51,15 @@ export function registerCommands(bot: Bot) {
 
 async function handleCommand(context: Context, command: BaseCommandType) {
   try {
+    // Check if user requested help
+    const text = context.match?.toString().trim() || "";
+    if (text === "--help" || text.includes("--help")) {
+      await context.reply(generateCommandHelp(command), {
+        parse_mode: "Markdown",
+      });
+      return;
+    }
+
     // Check cooldown
     if (command.cooldown && !checkCooldown(context, command)) {
       const remainingTime = getRemainingCooldown(context, command);
@@ -76,7 +85,7 @@ async function handleCommand(context: Context, command: BaseCommandType) {
       const validation = validateParameters(args, command.parameters);
       if (!validation.valid) {
         await context.reply(
-          `❌ Invalid parameters:\n${validation.errors.join("\n")}\n\nUsage: ${getCommandUsage(command)}`,
+          `❌ Invalid parameters:\n${validation.errors.join("\n")}\n\nUsage: ${getCommandUsage(command)}\n\n💡 Use \`/${command.name} --help\` for detailed help.`,
         );
         return;
       }
@@ -188,6 +197,88 @@ function getCommandUsage(command: BaseCommandType): string {
   }
 
   return usage;
+}
+
+export function generateCommandHelp(command: BaseCommandType): string {
+  let help = `📖 **Help for /${command.name}**\n\n`;
+
+  // Description
+  help += `📝 **Description:**\n${command.description || "No description available"}\n\n`;
+
+  // Usage
+  help += `🔧 **Usage:**\n\`${getCommandUsage(command)}\`\n\n`;
+
+  // Aliases
+  if (command.aliases && command.aliases.length > 0) {
+    help += `🔗 **Aliases:**\n${command.aliases.map((alias) => `\`/${alias}\``).join(", ")}\n\n`;
+  }
+
+  // Parameters
+  if (command.parameters && command.parameters.length > 0) {
+    help += `📋 **Parameters:**\n`;
+    for (const param of command.parameters) {
+      const required = param.required ? "**Required**" : "*Optional*";
+      const type = param.type.charAt(0).toUpperCase() + param.type.slice(1);
+
+      help += `• \`${param.name}\` (${type}) - ${required}\n`;
+      if (param.description) {
+        help += `  ${param.description}\n`;
+      }
+
+      if (param.choices && param.choices.length > 0) {
+        help += `  Valid options: ${param.choices.join(", ")}\n`;
+      }
+      help += `\n`;
+    }
+  }
+
+  // Example usage
+  if (command.name === "poll") {
+    help += `💡 **Examples:**\n`;
+    help += `\`/poll "What's your favorite color?" "Red;Blue;Green;Yellow"\`\n`;
+    help += `\`/poll "Choose a meeting time" "9 AM;10 AM;11 AM" true false\`\n\n`;
+  } else if (command.name === "calc") {
+    help += `💡 **Examples:**\n`;
+    help += `\`/calc 2 + 2\`\n`;
+    help += `\`/calc 10 * 5 - 3\`\n\n`;
+  } else if (command.parameters && command.parameters.length > 0) {
+    // Generic example for commands with parameters
+    const exampleArgs = command.parameters
+      .map((param) => {
+        if (param.choices && param.choices.length > 0) {
+          return param.choices[0];
+        }
+        switch (param.type) {
+          case "number":
+            return "123";
+          case "boolean":
+            return "true";
+          default:
+            return `"example_${param.name}"`;
+        }
+      })
+      .join(" ");
+    help += `💡 **Example:**\n\`/${command.name} ${exampleArgs}\`\n\n`;
+  }
+
+  // Category
+  if (command.category) {
+    help += `📁 **Category:** ${command.category}\n`;
+  }
+
+  // Admin only
+  if (command.adminOnly) {
+    help += `👑 **Admin Only:** Yes\n`;
+  }
+
+  // Cooldown
+  if (command.cooldown) {
+    help += `⏰ **Cooldown:** ${command.cooldown} seconds\n`;
+  }
+
+  help += `\n💡 **Tip:** You can use \`/${command.name} --help\` anytime to see this help message.`;
+
+  return help;
 }
 
 function checkCooldown(context: Context, command: BaseCommandType): boolean {
